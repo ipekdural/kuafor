@@ -1,0 +1,26 @@
+﻿@{
+    ViewData["Title"] = "Kayıt Ol";
+}
+
+<div class="container mt-4">
+    <h2>Kayıt Ol</h2>
+    <form method="post" action="/Kullanici/Kayit">
+        <div class="mb-3">
+            <label for="isim" class="form-label">İsim</label>
+            <input type="text" class="form-control" id="isim" name="Isim" required placeholder="Adınızı girin">
+        </div>
+        <div class="mb-3">
+            <label for="soyisim" class="form-label">Soyisim</label>
+            <input type="text" class="form-control" id="soyisim" name="Soyisim" required placeholder="Soyadınızı girin">
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">E-posta</label>
+            <input type="email" class="form-control" id="email" name="Email" required placeholder="E-postanızı girin">
+        </div>
+        <div class="mb-3">
+            <label for="sifre" class="form-label">Şifre</label>
+            <input type="password" class="form-control" id="sifre" name="Sifre" required placeholder="Şifrenizi girin">
+        </div>
+        <button type="submit" class="btn btn-primary">Kayıt Ol</button>
+    </form>
+</div>
