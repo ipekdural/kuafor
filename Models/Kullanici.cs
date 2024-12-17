@@ -1,23 +1,26 @@
-﻿public class Kullanici
+﻿namespace kuafor.Models
 {
-    public int Id
+    public class Kullanici
     {
-        get; set;
-    }
-    public string Isim
-    {
-        get; set;
-    }
-    public string Soyisim
-    {
-        get; set;
-    }
-    public string Email
-    {
-        get; set;
-    }
-    public string Sifre
-    {
-        get; set;
+        public int Id
+        {
+            get; set;
+        }
+        public string Isim
+        {
+            get; set;
+        }
+        public string Soyisim
+        {
+            get; set;
+        }
+        public string Email
+        {
+            get; set;
+        }
+        public string Sifre
+        {
+            get; set;
+        }
     }
 }

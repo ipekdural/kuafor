@@ -1,0 +1,50 @@
+﻿@model kuafor.Models.Calisan
+
+@{
+    ViewData["Title"] = "Çalışan Güncelle";
+}
+
+<h1>Çalışan Güncelle</h1>
+
+<form asp-action="CalisanGuncelle" method="post">
+    <input type="hidden" name="Id" value="@Model.CalisanId" />
+
+    <div class="form-group">
+        <label for="Isim">İsim</label>
+        <input type="text" class="form-control" id="Isim" name="Isim" value="@Model.Ad" required />
+    </div>
+
+    <div class="form-group">
+        <label for="Soyisim">Soyisim</label>
+        <input type="text" class="form-control" id="Soyisim" name="Soyisim" value="@Model.Soyad" required />
+    </div>
+
+    <div class="form-group">
+        <label for="HizmetIds">Sundukları Hizmetler</label>
+        <select multiple class="form-control" id="HizmetIds" name="hizmetIds">
+            @foreach (var hizmet in ViewBag.Hizmetler as List<kuafor.Models.Hizmet>)
+            {
+                <option value="@hizmet.HizmetId" data-hizmet-id="@hizmet.HizmetId">
+                    @hizmet.HizmetAdi
+                </option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Güncelle</button>
+</form>
+
+<a href="@Url.Action("CalisanListesi")" class="btn btn-secondary">Geri</a>
+
+<script>
+    $(document).ready(function () {
+        var hizmetIds = @Html.Raw(Json.Serialize(Model.CalisanHizmetler.Select(ch => ch.HizmetId).ToArray()));
+
+        $('#HizmetIds option').each(function () {
+            var optionValue = $(this).data('hizmet-id');
+            if (hizmetIds.includes(optionValue)) {
+                $(this).attr('selected', 'selected');
+            }
+        });
+    });
+</script>

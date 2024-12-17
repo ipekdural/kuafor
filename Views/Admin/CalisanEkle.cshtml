@@ -1,0 +1,32 @@
+﻿@model kuafor.Models.Calisan
+@{
+    ViewData["Title"] = "Çalışan Ekle";
+}
+
+<h1>Çalışan Ekle</h1>
+
+<form asp-action="CalisanEkle" method="post">
+    <div class="form-group">
+        <label for="Isim">İsim</label>
+        <input type="text" class="form-control" id="Isim" name="Isim" value="@Model.Ad" required />
+    </div>
+
+    <div class="form-group">
+        <label for="Soyisim">Soyisim</label>
+        <input type="text" class="form-control" id="Soyisim" name="Soyisim" value="@Model.Soyad" required />
+    </div>
+
+    <div class="form-group">
+        <label for="HizmetIds">Sundukları Hizmetler</label>
+        <select multiple class="form-control" id="HizmetIds" name="hizmetIds">
+            @foreach (var hizmet in ViewBag.Hizmetler as List<kuafor.Models.Hizmet>)
+            {
+                <option value="@hizmet.HizmetId">@hizmet.HizmetAdi</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Ekle</button>
+</form>
+
+<a href="@Url.Action("CalisanListesi")" class="btn btn-secondary">Geri</a>

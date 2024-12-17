@@ -1,0 +1,15 @@
+﻿@{
+    ViewData["Title"] = "Admin Paneli";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div>
+    <a href="@Url.Action("CalisanListesi", "Admin")" class="btn btn-primary">Çalışanları Görüntüle</a>
+    <a href="@Url.Action("RandevuListesi", "Admin")" class="btn btn-secondary">Randevuları Görüntüle</a>
+    <a href="@Url.Action("HizmetListesi", "Admin")" class="btn btn-success">Hizmetleri Görüntüle</a>
+</div>
+
+<form asp-action="CikisYap" method="post">
+    <button type="submit" class="btn btn-danger mt-3">Çıkış Yap</button>
+</form>

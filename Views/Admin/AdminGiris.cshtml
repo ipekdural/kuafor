@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Admin Girişi";
+}
+
+<h1>Admin Girişi</h1>
+
+@if (!string.IsNullOrEmpty(ViewBag.HataMesaji))
+{
+    <div class="alert alert-danger">@ViewBag.HataMesaji</div>
+}
+
+<form method="post" asp-action="AdminGiris">
+    <div class="mb-3">
+        <label for="Email" class="form-label">E-posta</label>
+        <input type="email" class="form-control" id="Email" name="Email" required />
+    </div>
+    <div class="mb-3">
+        <label for="Sifre" class="form-label">Şifre</label>
+        <input type="password" class="form-control" id="Sifre" name="Sifre" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Giriş Yap</button>
+</form>

@@ -1,0 +1,43 @@
+﻿@model List<kuafor.Models.Calisan>
+
+@{
+    ViewData["Title"] = "Çalışan Listesi";
+}
+
+<h1>Çalışan Listesi</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>İsim</th>
+            <th>Soyisim</th>
+            <th>Uzmanlık Alanları</th>
+            <th>Aksiyonlar</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var calisan in Model)
+        {
+            <tr>
+                <td>@calisan.Ad</td>
+                <td>@calisan.Soyad</td>
+                <td>
+                    @foreach (var calisanHizmet in calisan.CalisanHizmetler)
+                    {
+                        <span>@calisanHizmet.Hizmet.HizmetAdi</span>
+
+                        <br />
+                    }
+                </td>
+                <td>
+                    <a href="@Url.Action("CalisanGuncelle", new { id = calisan.CalisanId })" class="btn btn-primary">Güncelle</a>
+                    <form action="@Url.Action("CalisanSil", new { id = calisan.CalisanId })" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Çalışanı silmek istediğinize emin misiniz?')">Sil</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="@Url.Action("CalisanEkle")" class="btn btn-success">Çalışan Ekle</a>
