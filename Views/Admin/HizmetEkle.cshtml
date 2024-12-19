@@ -1,0 +1,23 @@
+﻿@model kuafor.Models.Hizmet
+
+@{
+    ViewData["Title"] = "Hizmet Ekle";
+}
+
+<h1>Hizmet Ekle</h1>
+
+<form asp-action="HizmetEkle" method="post">
+    <div>
+        <label for="HizmetAdi">Hizmet Adı:</label>
+        <input type="text" id="HizmetAdi" name="HizmetAdi" required />
+    </div>
+    <div>
+        <label for="Sure">Süre (Dakika):</label>
+        <input type="number" id="Sure" name="Sure" min="1" required />
+    </div>
+    <div>
+        <label for="Ucret">Ücret:</label>
+        <input type="number" id="Ucret" name="Ucret" min="0" step="0.01" required />
+    </div>
+    <button type="submit">Kaydet</button>
+</form>

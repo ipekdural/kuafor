@@ -1,0 +1,30 @@
+﻿@model kuafor.Models.Hizmet
+
+@{
+    ViewData["Title"] = "Hizmet Güncelle";
+}
+
+<h1>Hizmet Güncelle</h1>
+
+<form asp-action="HizmetGuncelle" method="post">
+    <input type="hidden" name="HizmetId" value="@Model.HizmetId" />
+
+    <div class="form-group">
+        <label for="HizmetAdi">Hizmet Adı</label>
+        <input type="text" class="form-control" id="HizmetAdi" name="HizmetAdi" value="@Model.HizmetAdi" required />
+    </div>
+
+    <div class="form-group">
+        <label for="Sure">Hizmet Süresi (Dakika)</label>
+        <input type="number" class="form-control" id="Sure" name="Sure" value="@Model.Sure.TotalMinutes" min="1" required />
+    </div>
+
+    <div class="form-group">
+        <label for="Ucret">Ücret</label>
+        <input type="number" class="form-control" id="Ucret" name="Ucret" value="@Model.Ucret" step="0.01" required />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Güncelle</button>
+</form>
+
+<a asp-action="HizmetListesi" class="btn btn-secondary">Geri</a>

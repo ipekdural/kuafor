@@ -1,32 +1,36 @@
 ﻿@model kuafor.Models.Calisan
-@{
-    ViewData["Title"] = "Çalışan Ekle";
-}
 
-<h1>Çalışan Ekle</h1>
-
+<h2>Çalışan Ekle</h2>
 <form asp-action="CalisanEkle" method="post">
     <div class="form-group">
-        <label for="Isim">İsim</label>
-        <input type="text" class="form-control" id="Isim" name="Isim" value="@Model.Ad" required />
+        <label for="Ad">Ad</label>
+        <input type="text" id="Ad" name="Ad" class="form-control" required />
     </div>
-
     <div class="form-group">
-        <label for="Soyisim">Soyisim</label>
-        <input type="text" class="form-control" id="Soyisim" name="Soyisim" value="@Model.Soyad" required />
+        <label for="Soyad">Soyad</label>
+        <input type="text" id="Soyad" name="Soyad" class="form-control" required />
     </div>
-
     <div class="form-group">
-        <label for="HizmetIds">Sundukları Hizmetler</label>
-        <select multiple class="form-control" id="HizmetIds" name="hizmetIds">
-            @foreach (var hizmet in ViewBag.Hizmetler as List<kuafor.Models.Hizmet>)
-            {
-                <option value="@hizmet.HizmetId">@hizmet.HizmetAdi</option>
-            }
-        </select>
+        <label>Hizmetler (Verilen Hizmetler)</label>
+        @foreach (var hizmet in ViewBag.Hizmetler)
+        {
+            <div>
+                <input type="checkbox" name="hizmetIds" value="@hizmet.HizmetId" />
+                <label>@hizmet.HizmetAdi</label>
+            </div>
+        }
     </div>
-
-    <button type="submit" class="btn btn-primary">Ekle</button>
+    <div class="form-group">
+        <label>Uzmanlık Alanı</label>
+        @Html.DropDownList(
+                 "uzmanlikHizmetId",
+                 new SelectList(ViewBag.Hizmetler, "HizmetId", "HizmetAdi"),
+                 "Uzmanlık alanını seçiniz",
+                 new
+                 {
+                     @class = "form-control"
+                 }
+                 )
+    </div>
+    <button type="submit" class="btn btn-success">Ekle</button>
 </form>
-
-<a href="@Url.Action("CalisanListesi")" class="btn btn-secondary">Geri</a>

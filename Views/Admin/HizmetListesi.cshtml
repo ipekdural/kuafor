@@ -1,0 +1,51 @@
+﻿@model IEnumerable<kuafor.Models.Hizmet>
+
+@{
+    ViewData["Title"] = "Hizmet Listesi";
+}
+
+<h1>Hizmet Listesi</h1>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Hizmet Adı</th>
+            <th>Süre</th>
+            <th>Ücret</th>
+            <th>İşlemler</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="5" class="text-center">Henüz hizmet eklenmedi.</td>
+            </tr>
+        }
+        else
+        {
+            int i = 1;
+            foreach (var hizmet in Model)
+            {
+                <tr>
+                    <td>@i</td>
+                    <td>@hizmet.HizmetAdi</td>
+                    <td>@hizmet.Sure.Hours saat @hizmet.Sure.Minutes dakika</td>
+                    <td>@hizmet.Ucret.ToString("C")</td>
+                    <td>
+                        <a asp-action="HizmetGuncelle" asp-route-id="@hizmet.HizmetId" class="btn btn-sm btn-warning">Güncelle</a>
+                        <form asp-action="HizmetSil" asp-route-id="@hizmet.HizmetId" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Bu hizmeti silmek istediğinize emin misiniz?');">
+                                Sil
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                i++;
+            }
+        }
+    </tbody>
+</table>
+
+<a asp-action="HizmetEkle" class="btn btn-primary">Yeni Hizmet Ekle</a>

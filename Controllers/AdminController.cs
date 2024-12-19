@@ -62,38 +62,48 @@ public class AdminController : Controller
         HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("AdminGiris");
     }
-
-    // Admin Paneli: Çalışan Listesini Görüntüle
     [Authorize(Policy = "Admin")]
     public IActionResult CalisanListesi()
     {
         var calisanlar = _context.Calisanlar
-            .Include(c => c.CalisanHizmetler) // Çalışanların sunduğu hizmetler
-            .ThenInclude(ch => ch.Hizmet) // Hizmet detaylarını al
+            .Include(c => c.CalisanHizmetler)
+            .ThenInclude(ch => ch.Hizmet) // Hizmetleri dahil et
+            .Include(c => c.UzmanlikHizmet) // Uzmanlık alanını dahil et
             .ToList();
 
         return View(calisanlar);
     }
 
-    // Admin Paneli: Çalışan Ekle
+
     [Authorize(Policy = "Admin")]
     [HttpGet]
     public IActionResult CalisanEkle()
     {
-        ViewBag.Hizmetler = _context.Hizmetler.ToList();  // Hizmetleri ekranda listele
+        ViewBag.Hizmetler = _context.Hizmetler.ToList(); // Tüm hizmetleri al
         return View();
     }
-
     [Authorize(Policy = "Admin")]
     [HttpPost]
-    public IActionResult CalisanEkle(Calisan calisan, List<int> hizmetIds)
+    public IActionResult CalisanEkle(Calisan calisan, List<int> hizmetIds, int uzmanlikHizmetId)
     {
         if (ModelState.IsValid)
         {
+            // Uzmanlık alanı, seçilen hizmetlerden biri olmalı
+            if (!hizmetIds.Contains(uzmanlikHizmetId))
+            {
+                ModelState.AddModelError("", "Uzmanlık alanı, verilen hizmetlerden biri olmalıdır.");
+                ViewBag.Hizmetler = _context.Hizmetler.ToList();
+                return View(calisan);
+            }
+
+            // Uzmanlık alanı atanıyor
+            calisan.UzmanlikHizmetId = uzmanlikHizmetId;
+
+            // Çalışanı ekle
             _context.Calisanlar.Add(calisan);
             _context.SaveChanges();
 
-            // Çalışana hizmetleri ekle
+            // Çalışan ve hizmet ilişkilerini ekle
             foreach (var hizmetId in hizmetIds)
             {
                 _context.CalisanHizmetler.Add(new CalisanHizmet
@@ -102,14 +112,19 @@ public class AdminController : Controller
                     HizmetId = hizmetId
                 });
             }
+
             _context.SaveChanges();
+
+            // Çalışan listesine yönlendir
             return RedirectToAction("CalisanListesi");
         }
+
         ViewBag.Hizmetler = _context.Hizmetler.ToList();
         return View(calisan);
     }
 
-    // Admin Paneli: Çalışan Güncelle
+
+
     [Authorize(Policy = "Admin")]
     [HttpGet]
     public IActionResult CalisanGuncelle(int id)
@@ -130,19 +145,26 @@ public class AdminController : Controller
 
     [Authorize(Policy = "Admin")]
     [HttpPost]
-    public IActionResult CalisanGuncelle(Calisan calisan, List<int> hizmetIds)
+    public IActionResult CalisanGuncelle(Calisan calisan, List<int> hizmetIds, int uzmanlikHizmetId)
     {
         if (ModelState.IsValid)
         {
+            if (!hizmetIds.Contains(uzmanlikHizmetId))
+            {
+                ModelState.AddModelError("", "Uzmanlık alanı, verilen hizmetlerden biri olmalıdır.");
+                ViewBag.Hizmetler = _context.Hizmetler.ToList();
+                return View(calisan);
+            }
+
+            calisan.UzmanlikHizmetId = uzmanlikHizmetId;
+
             _context.Calisanlar.Update(calisan);
             _context.SaveChanges();
 
-            // Eski hizmetleri sil
             var eskiHizmetler = _context.CalisanHizmetler.Where(ch => ch.CalisanId == calisan.CalisanId);
             _context.CalisanHizmetler.RemoveRange(eskiHizmetler);
             _context.SaveChanges();
 
-            // Yeni hizmetleri ekle
             foreach (var hizmetId in hizmetIds)
             {
                 _context.CalisanHizmetler.Add(new CalisanHizmet
@@ -151,15 +173,15 @@ public class AdminController : Controller
                     HizmetId = hizmetId
                 });
             }
-
             _context.SaveChanges();
+
             return RedirectToAction("CalisanListesi");
         }
+
         ViewBag.Hizmetler = _context.Hizmetler.ToList();
         return View(calisan);
     }
 
-    // Admin Paneli: Çalışan Sil
     [Authorize(Policy = "Admin")]
     [HttpPost]
     public IActionResult CalisanSil(int id)
@@ -170,27 +192,39 @@ public class AdminController : Controller
 
         if (calisan != null)
         {
-            _context.CalisanHizmetler.RemoveRange(calisan.CalisanHizmetler); // Çalışanın hizmetlerini sil
-            _context.Calisanlar.Remove(calisan); // Çalışanı sil
+            // İlgili hizmetleri ve çalışanı sil
+            _context.CalisanHizmetler.RemoveRange(calisan.CalisanHizmetler);
+            _context.Calisanlar.Remove(calisan);
             _context.SaveChanges();
         }
 
         return RedirectToAction("CalisanListesi");
     }
 
-    // Admin Paneli: Randevuları Görüntüle
     [Authorize(Policy = "Admin")]
     public IActionResult RandevuListesi()
     {
-        var randevular = _context.Randevular
+        var onaylanmamisRandevular = _context.Randevular
             .Include(r => r.Calisan)
             .Include(r => r.Hizmet)
+            .Include(r => r.Kullanici)
+            .Where(r => !r.OnayliMi)
             .ToList();
 
-        return View(randevular);
+        var onaylanmisRandevular = _context.Randevular
+            .Include(r => r.Calisan)
+            .Include(r => r.Hizmet)
+            .Include(r => r.Kullanici)
+            .Where(r => r.OnayliMi)
+            .ToList();
+
+        ViewBag.OnaylanmamisRandevular = onaylanmamisRandevular;
+        return View(onaylanmisRandevular); // Onaylanmış randevular Model olarak gönderilir
     }
 
-    // Admin Paneli: Hizmetleri Görüntüle
+
+
+    // Hizmet Listesini Görüntüle
     [Authorize(Policy = "Admin")]
     public IActionResult HizmetListesi()
     {
@@ -198,7 +232,92 @@ public class AdminController : Controller
         return View(hizmetler);
     }
 
-    // Kullanıcı Listesini JSON formatında döndürme (Örnek)
+    // Hizmet Ekle (GET)
+    [Authorize(Policy = "Admin")]
+    [HttpGet]
+    public IActionResult HizmetEkle()
+    {
+        return View();
+    }
+
+    // Hizmet Ekleme
+    [Authorize(Policy = "Admin")]
+    [HttpPost]
+    public IActionResult HizmetEkle(string HizmetAdi, int Sure, decimal Ucret)
+    {
+        if (ModelState.IsValid)
+        {
+            var hizmet = new Hizmet
+            {
+                HizmetAdi = HizmetAdi,
+                Sure = TimeSpan.FromMinutes(Sure), // Dakikayı TimeSpan'e çevir
+                Ucret = Ucret
+            };
+
+            _context.Hizmetler.Add(hizmet);
+            _context.SaveChanges();
+
+            return RedirectToAction("HizmetListesi");
+        }
+
+        return View();
+    }
+
+    // Hizmet Güncelle (GET)
+    [Authorize(Policy = "Admin")]
+    [HttpGet]
+    public IActionResult HizmetGuncelle(int id)
+    {
+        var hizmet = _context.Hizmetler.Find(id);
+        if (hizmet == null)
+        {
+            return NotFound();
+        }
+        return View(hizmet);
+    }
+
+    // Hizmet Güncelleme
+    [Authorize(Policy = "Admin")]
+    [HttpPost]
+    public IActionResult HizmetGuncelle(int HizmetId, string HizmetAdi, int Sure, decimal Ucret)
+    {
+        if (ModelState.IsValid)
+        {
+            var hizmet = _context.Hizmetler.FirstOrDefault(h => h.HizmetId == HizmetId);
+            if (hizmet == null)
+            {
+                return NotFound();
+            }
+
+            hizmet.HizmetAdi = HizmetAdi;
+            hizmet.Sure = TimeSpan.FromMinutes(Sure); // Dakikayı TimeSpan'e çevir
+            hizmet.Ucret = Ucret;
+
+            _context.Hizmetler.Update(hizmet);
+            _context.SaveChanges();
+
+            return RedirectToAction("HizmetListesi");
+        }
+
+        return View();
+    }
+
+
+    // Hizmet Sil
+    [Authorize(Policy = "Admin")]
+    [HttpPost]
+    public IActionResult HizmetSil(int id)
+    {
+        var hizmet = _context.Hizmetler.Find(id);
+        if (hizmet != null)
+        {
+            _context.Hizmetler.Remove(hizmet);
+            _context.SaveChanges();
+        }
+        return RedirectToAction("HizmetListesi");
+    }
+
+    // Kullanıcı Listesini JSON formatında döndürme
     [Authorize(Policy = "Admin")]
     public IActionResult KullaniciListesi()
     {
@@ -213,4 +332,30 @@ public class AdminController : Controller
 
         return Json(kullanicilar);
     }
+    [Authorize(Policy = "Admin")]
+    [HttpPost]
+    public IActionResult RandevuOnayla(int id)
+    {
+        var randevu = _context.Randevular.FirstOrDefault(r => r.RandevuId == id);
+        if (randevu != null)
+        {
+            randevu.OnayliMi = true; // Randevuyu onayla
+            _context.SaveChanges();
+        }
+        return RedirectToAction("RandevuListesi");
+    }
+
+    [Authorize(Policy = "Admin")]
+    [HttpPost]
+    public IActionResult RandevuRed(int id)
+    {
+        var randevu = _context.Randevular.FirstOrDefault(r => r.RandevuId == id);
+        if (randevu != null)
+        {
+            _context.Randevular.Remove(randevu); // Randevuyu sil
+            _context.SaveChanges();
+        }
+        return RedirectToAction("RandevuListesi");
+    }
+
 }

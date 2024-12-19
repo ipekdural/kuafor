@@ -31,6 +31,18 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<CalisanHizmet>()
+          .HasKey(ch => new { ch.CalisanId, ch.HizmetId });
+
+        modelBuilder.Entity<CalisanHizmet>()
+            .HasOne(ch => ch.Calisan)
+            .WithMany(c => c.CalisanHizmetler)
+            .HasForeignKey(ch => ch.CalisanId);
+
+        modelBuilder.Entity<CalisanHizmet>()
+            .HasOne(ch => ch.Hizmet)
+            .WithMany()
+            .HasForeignKey(ch => ch.HizmetId);
 
         // Kullanıcılar tablosunun yapılandırılması
         modelBuilder.Entity<Kullanici>(entity =>
@@ -64,41 +76,44 @@ public class AppDbContext : DbContext
         });
 
         // Çalışanlar tablosunun yapılandırılması
-        modelBuilder.Entity<Calisan>(entity =>
-        {
-            entity.HasKey(c => c.CalisanId); // Birincil anahtar
-            entity.Property(c => c.Ad)
-                .IsRequired()
-                .HasMaxLength(100);
-            entity.Property(c => c.Soyad)
-                .IsRequired()
-                .HasMaxLength(100);
-            entity.Property(c => c.UzmanlikAlanlari)
-                .HasMaxLength(255);
-        });
+        modelBuilder.Entity<Calisan>()
+           .HasOne(c => c.UzmanlikHizmet)
+           .WithMany()
+           .HasForeignKey(c => c.UzmanlikHizmetId)
+           .OnDelete(DeleteBehavior.Restrict); // Uzmanlık alanı hizmeti silindiğinde kısıtlama
 
-        // Çalışan ve Hizmet ilişkisini tanımlamak
-        modelBuilder.Entity<CalisanHizmet>()
-            .HasKey(ch => new { ch.CalisanId, ch.HizmetId });
-
-        modelBuilder.Entity<CalisanHizmet>()
-            .HasOne(ch => ch.Calisan)
-            .WithMany(c => c.CalisanHizmetler)
-            .HasForeignKey(ch => ch.CalisanId);
-
-        modelBuilder.Entity<CalisanHizmet>()
-            .HasOne(ch => ch.Hizmet)
-            .WithMany()
-            .HasForeignKey(ch => ch.HizmetId);
 
         // Randevular tablosunun yapılandırılması
         modelBuilder.Entity<Randevu>(entity =>
         {
-            entity.HasKey(r => r.RandevuId);
+            entity.HasKey(r => r.RandevuId); // Birincil anahtar
+
             entity.Property(r => r.RandevuTarihi)
-                .IsRequired();
+                .IsRequired(); // Randevu tarihi zorunlu
+
             entity.Property(r => r.OnayliMi)
-                .IsRequired();
+                .IsRequired(); // Onay durumu zorunlu
+
+            // Hizmet ile ilişki
+            entity.HasOne(r => r.Hizmet)
+                .WithMany()
+                .HasForeignKey(r => r.HizmetId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Çalışan ile ilişki
+            entity.HasOne(r => r.Calisan)
+                .WithMany()
+                .HasForeignKey(r => r.CalisanId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Kullanıcı ile ilişki
+            entity.HasOne(r => r.Kullanici)
+                .WithMany()
+                .HasForeignKey(r => r.KullaniciId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
+
     }
+
+
 }

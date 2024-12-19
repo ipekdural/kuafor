@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using kuafor.Models; // Kullanici ve AppDbContext için gerekli
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 public class KullaniciController : Controller
 {
@@ -75,4 +78,57 @@ public class KullaniciController : Controller
         // Kayıt başarılıysa giriş sayfasına yönlendir
         return RedirectToAction("Giris", "Kullanici");
     }
+    [Authorize]
+    public IActionResult AldigimRandevular()
+    {
+        // Oturumdaki kullanıcıyı al
+        var kullaniciEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+        var kullanici = _context.Kullanicilar.FirstOrDefault(k => k.Email == kullaniciEmail);
+
+        if (kullanici == null)
+        {
+            return RedirectToAction("Giris", "Kullanici");
+        }
+
+        // Kullanıcının aldığı randevular
+        var randevular = _context.Randevular
+            .Include(r => r.Calisan)
+            .Include(r => r.Hizmet)
+            .Where(r => r.KullaniciId == kullanici.Id)
+            .ToList();
+
+        ViewBag.Calisanlar = _context.Calisanlar.Include(c => c.CalisanHizmetler).ThenInclude(ch => ch.Hizmet).ToList();
+        return View(randevular);
+    }
+
+    [Authorize]
+    [HttpPost]
+    public IActionResult RandevuAl(int hizmetId, int calisanId, DateTime randevuTarihi)
+    {
+        // Oturumdaki kullanıcıyı al
+        var kullaniciEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+        var kullanici = _context.Kullanicilar.FirstOrDefault(k => k.Email == kullaniciEmail);
+
+        if (kullanici == null)
+        {
+            return RedirectToAction("Giris", "Kullanici");
+        }
+
+        // Yeni randevu ekleme
+        var yeniRandevu = new Randevu
+        {
+            KullaniciId = kullanici.Id,
+            HizmetId = hizmetId,
+            CalisanId = calisanId,
+            RandevuTarihi = randevuTarihi,
+            OnayliMi = false // Başlangıçta onaysız
+        };
+
+        _context.Randevular.Add(yeniRandevu);
+        _context.SaveChanges();
+
+        return RedirectToAction("AldigimRandevular");
+    }
+
+
 }

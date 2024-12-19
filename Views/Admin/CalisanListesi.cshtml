@@ -1,43 +1,42 @@
-﻿@model List<kuafor.Models.Calisan>
+﻿@model IEnumerable<kuafor.Models.Calisan>
 
-@{
-    ViewData["Title"] = "Çalışan Listesi";
-}
-
-<h1>Çalışan Listesi</h1>
-
+<h2>Çalışan Listesi</h2>
 <table class="table">
     <thead>
         <tr>
-            <th>İsim</th>
-            <th>Soyisim</th>
-            <th>Uzmanlık Alanları</th>
-            <th>Aksiyonlar</th>
+            <th>ID</th>
+            <th>Ad</th>
+            <th>Soyad</th>
+            <th>Uzmanlık Alanı</th>
+            <th>Verilen Hizmetler</th>
+            <th>İşlemler</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var calisan in Model)
         {
             <tr>
+                <td>@calisan.CalisanId</td>
                 <td>@calisan.Ad</td>
                 <td>@calisan.Soyad</td>
+                <td>@calisan.UzmanlikHizmet?.HizmetAdi</td>
                 <td>
-                    @foreach (var calisanHizmet in calisan.CalisanHizmetler)
+                    @foreach (var hizmet in calisan.CalisanHizmetler.Select(ch => ch.Hizmet))
                     {
-                        <span>@calisanHizmet.Hizmet.HizmetAdi</span>
+                        <span>@hizmet.HizmetAdi</span>
 
                         <br />
                     }
                 </td>
                 <td>
-                    <a href="@Url.Action("CalisanGuncelle", new { id = calisan.CalisanId })" class="btn btn-primary">Güncelle</a>
-                    <form action="@Url.Action("CalisanSil", new { id = calisan.CalisanId })" method="post" style="display:inline;">
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Çalışanı silmek istediğinize emin misiniz?')">Sil</button>
+                    <a href="@Url.Action("CalisanGuncelle", new { id = calisan.CalisanId })" class="btn btn-warning">Güncelle</a>
+                    <form action="@Url.Action("CalisanSil")" method="post" style="display:inline;">
+                        <input type="hidden" name="id" value="@calisan.CalisanId" />
+                        <button type="submit" class="btn btn-danger">Sil</button>
                     </form>
                 </td>
             </tr>
         }
     </tbody>
 </table>
-
-<a href="@Url.Action("CalisanEkle")" class="btn btn-success">Çalışan Ekle</a>
+<a href="@Url.Action("CalisanEkle")" class="btn btn-primary">Yeni Çalışan Ekle</a>

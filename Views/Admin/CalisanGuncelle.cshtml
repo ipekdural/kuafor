@@ -1,50 +1,38 @@
 ﻿@model kuafor.Models.Calisan
 
-@{
-    ViewData["Title"] = "Çalışan Güncelle";
-}
-
-<h1>Çalışan Güncelle</h1>
-
+<h2>Çalışan Güncelle</h2>
 <form asp-action="CalisanGuncelle" method="post">
-    <input type="hidden" name="Id" value="@Model.CalisanId" />
-
+    <input type="hidden" name="CalisanId" value="@Model.CalisanId" />
     <div class="form-group">
-        <label for="Isim">İsim</label>
-        <input type="text" class="form-control" id="Isim" name="Isim" value="@Model.Ad" required />
+        <label for="Ad">Ad</label>
+        <input type="text" id="Ad" name="Ad" value="@Model.Ad" class="form-control" />
     </div>
-
     <div class="form-group">
-        <label for="Soyisim">Soyisim</label>
-        <input type="text" class="form-control" id="Soyisim" name="Soyisim" value="@Model.Soyad" required />
+        <label for="Soyad">Soyad</label>
+        <input type="text" id="Soyad" name="Soyad" value="@Model.Soyad" class="form-control" />
     </div>
-
     <div class="form-group">
-        <label for="HizmetIds">Sundukları Hizmetler</label>
-        <select multiple class="form-control" id="HizmetIds" name="hizmetIds">
-            @foreach (var hizmet in ViewBag.Hizmetler as List<kuafor.Models.Hizmet>)
+        <label>Hizmetler</label>
+        @foreach (var hizmet in ViewBag.Hizmetler)
+        {
+            <div>
+                <input type="checkbox" name="hizmetIds" value="@hizmet.HizmetId" 
+                       @(Model.CalisanHizmetler.Any(ch => ch.HizmetId == hizmet.HizmetId) ? "checked" : "") />
+                <label>@hizmet.HizmetAdi</label>
+            </div>
+        }
+    </div>
+    <div class="form-group">
+        <label>Uzmanlık Alanı</label>
+        <select name="uzmanlikHizmetId" class="form-control">
+            @foreach (var hizmet in ViewBag.Hizmetler)
             {
-                <option value="@hizmet.HizmetId" data-hizmet-id="@hizmet.HizmetId">
+                <option value="@hizmet.HizmetId" >
                     @hizmet.HizmetAdi
                 </option>
             }
-        </select>
+        }
+    </select>
     </div>
-
-    <button type="submit" class="btn btn-primary">Güncelle</button>
+    <button type="submit" class="btn btn-warning">Güncelle</button>
 </form>
-
-<a href="@Url.Action("CalisanListesi")" class="btn btn-secondary">Geri</a>
-
-<script>
-    $(document).ready(function () {
-        var hizmetIds = @Html.Raw(Json.Serialize(Model.CalisanHizmetler.Select(ch => ch.HizmetId).ToArray()));
-
-        $('#HizmetIds option').each(function () {
-            var optionValue = $(this).data('hizmet-id');
-            if (hizmetIds.includes(optionValue)) {
-                $(this).attr('selected', 'selected');
-            }
-        });
-    });
-</script>

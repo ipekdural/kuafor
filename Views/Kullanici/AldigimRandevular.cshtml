@@ -1,0 +1,57 @@
+﻿@model IEnumerable<kuafor.Models.Randevu>
+
+<h2>Aldığım Randevular</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Tarih</th>
+            <th>Çalışan</th>
+            <th>Hizmet</th>
+            <th>Onay Durumu</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var randevu in Model)
+        {
+            <tr>
+                <td>@randevu.RandevuTarihi.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@randevu.Calisan?.Ad @randevu.Calisan?.Soyad</td>
+                <td>@randevu.Hizmet?.HizmetAdi</td>
+                <td>@(randevu.OnayliMi ? "Onaylandı" : "Onay Bekliyor")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h2>Yeni Randevu Al</h2>
+<form asp-action="RandevuAl" method="post">
+    <div class="form-group">
+        <label for="HizmetId">Hizmet</label>
+        <select id="HizmetId" name="hizmetId" class="form-control" required>
+            <option value="">Hizmet Seçiniz</option>
+            @foreach (var calisan in ViewBag.Calisanlar)
+            {
+                foreach (var hizmet in calisan.CalisanHizmetler.Select(ch => ch.Hizmet))
+                {
+                    <option value="@hizmet.HizmetId">@hizmet.HizmetAdi (Çalışan: @calisan.Ad)</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="CalisanId">Çalışan</label>
+        <select id="CalisanId" name="calisanId" class="form-control" required>
+            <option value="">Çalışan Seçiniz</option>
+            @foreach (var calisan in ViewBag.Calisanlar)
+            {
+                <option value="@calisan.CalisanId">@calisan.Ad @calisan.Soyad</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="RandevuTarihi">Tarih ve Saat</label>
+        <input type="datetime-local" id="RandevuTarihi" name="randevuTarihi" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Randevu Al</button>
+</form>
