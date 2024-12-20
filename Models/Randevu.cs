@@ -10,7 +10,7 @@
         {
             get; set;
         } // Randevu tarihi
-        public int HizmetId
+        public int? HizmetId
         {
             get; set;
         } // FK: Alınan hizmet
@@ -19,7 +19,7 @@
             get; set;
         }
 
-        public int CalisanId
+        public int? CalisanId
         {
             get; set;
         } // FK: Hizmetin yapılacağı çalışan
@@ -28,7 +28,7 @@
             get; set;
         }
 
-        public int KullaniciId
+        public int? KullaniciId
         {
             get; set;
         } // FK: Randevuyu alan kullanıcı

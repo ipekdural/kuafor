@@ -352,7 +352,8 @@ public class AdminController : Controller
         var randevu = _context.Randevular.FirstOrDefault(r => r.RandevuId == id);
         if (randevu != null)
         {
-            _context.Randevular.Remove(randevu); // Randevuyu sil
+            randevu.OnayliMi = false; // Onaylı değil olarak işaretle
+            _context.Randevular.Update(randevu); // Güncelleme işlemi
             _context.SaveChanges();
         }
         return RedirectToAction("RandevuListesi");

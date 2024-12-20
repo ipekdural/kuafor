@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 
 public class KullaniciController : Controller
 {
@@ -32,14 +33,27 @@ public class KullaniciController : Controller
 
         if (kullanici != null)
         {
-            // Giriş başarılı, anasayfaya yönlendir
-            return RedirectToAction("Index", "Home");
+            // Kullanıcı giriş başarılı olduğunda
+            // Kullanıcının email bilgisi oturumda tutulabilir
+            var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Email, kullanici.Email),
+            new Claim(ClaimTypes.Name, kullanici.Isim)
+        };
+
+            var identity = new ClaimsIdentity(claims, "Login");
+            var principal = new ClaimsPrincipal(identity);
+            HttpContext.SignInAsync(principal);
+
+            // Giriş başarılı, randevular sayfasına yönlendir
+            return RedirectToAction("AldigimRandevular", "Kullanici");
         }
 
         // Giriş başarısızsa hata mesajı gönder
         ViewBag.HataMesaji = "Geçersiz e-posta veya şifre.";
         return View();
     }
+
 
     // GET: Kullanici/Kayit
     [HttpGet]
@@ -81,7 +95,6 @@ public class KullaniciController : Controller
     [Authorize]
     public IActionResult AldigimRandevular()
     {
-        // Oturumdaki kullanıcıyı al
         var kullaniciEmail = User.FindFirst(ClaimTypes.Email)?.Value;
         var kullanici = _context.Kullanicilar.FirstOrDefault(k => k.Email == kullaniciEmail);
 
@@ -90,14 +103,18 @@ public class KullaniciController : Controller
             return RedirectToAction("Giris", "Kullanici");
         }
 
-        // Kullanıcının aldığı randevular
         var randevular = _context.Randevular
-            .Include(r => r.Calisan)
-            .Include(r => r.Hizmet)
-            .Where(r => r.KullaniciId == kullanici.Id)
+           .Include(r => r.Calisan)
+           .Include(r => r.Hizmet)
+           .Where(r => r.KullaniciId == kullanici.Id) // Kullanıcıya ait tüm randevuları getir
+           .ToList();
+
+
+        ViewBag.Calisanlar = _context.Calisanlar
+            .Include(c => c.CalisanHizmetler)
+            .ThenInclude(ch => ch.Hizmet)
             .ToList();
 
-        ViewBag.Calisanlar = _context.Calisanlar.Include(c => c.CalisanHizmetler).ThenInclude(ch => ch.Hizmet).ToList();
         return View(randevular);
     }
 
@@ -112,6 +129,50 @@ public class KullaniciController : Controller
         if (kullanici == null)
         {
             return RedirectToAction("Giris", "Kullanici");
+        }
+
+        // Geçmiş bir tarihe randevu alınamaz
+        if (randevuTarihi < DateTime.Now)
+        {
+            TempData["HataMesaji"] = "Geçmiş bir tarihe randevu alınamaz.";
+            return RedirectToAction("AldigimRandevular");
+        }
+
+        // Hizmet süresini dakika cinsine çek
+        var hizmet = _context.Hizmetler.FirstOrDefault(h => h.HizmetId == hizmetId);
+        if (hizmet == null)
+        {
+            TempData["HataMesaji"] = "Geçersiz hizmet seçimi.";
+            return RedirectToAction("AldigimRandevular");
+        }
+        var hizmetSuresiDakika = hizmet.Sure.TotalMinutes;
+
+        // Çalışanın randevu çakışmasını kontrol et
+        var calisanRandevusuVarMi = _context.Randevular
+            .Where(r => r.CalisanId == calisanId)
+            .Any(r =>
+                r.RandevuTarihi <= randevuTarihi &&
+                r.RandevuTarihi.AddMinutes(hizmetSuresiDakika) > randevuTarihi
+            );
+
+        if (calisanRandevusuVarMi)
+        {
+            TempData["HataMesaji"] = "Seçilen çalışanın bu saat aralığında başka bir randevusu var.";
+            return RedirectToAction("AldigimRandevular");
+        }
+
+        // Kullanıcının randevu çakışmasını kontrol et
+        var kullaniciRandevusuVarMi = _context.Randevular
+            .Where(r => r.KullaniciId == kullanici.Id)
+            .Any(r =>
+                r.RandevuTarihi <= randevuTarihi &&
+                r.RandevuTarihi.AddMinutes(hizmetSuresiDakika) > randevuTarihi
+            );
+
+        if (kullaniciRandevusuVarMi)
+        {
+            TempData["HataMesaji"] = "Bu saat aralığında zaten başka bir randevunuz var.";
+            return RedirectToAction("AldigimRandevular");
         }
 
         // Yeni randevu ekleme
@@ -129,6 +190,11 @@ public class KullaniciController : Controller
 
         return RedirectToAction("AldigimRandevular");
     }
+
+
+
+
+
 
 
 }

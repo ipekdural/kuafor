@@ -1,13 +1,34 @@
-﻿@model IEnumerable<kuafor.Models.Randevu>
+﻿@model List<kuafor.Models.Randevu>
 
-<h2>Aldığım Randevular</h2>
+@{
+    var kullaniciAdi = User.Identity.Name; // Kullanıcı adı oturumdan alınır
+    var calisanlar = ViewBag.Calisanlar as List<kuafor.Models.Calisan>; // ViewBag'i uygun türe cast et
+}
+
+<h2>Randevularım</h2>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4>Hoşgeldiniz, @kullaniciAdi</h4>
+    </div>
+    <form asp-action="CikisYap" method="post">
+        <button type="submit" class="btn btn-danger">Çıkış Yap</button>
+    </form>
+</div>
+
+@if (TempData["HataMesaji"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["HataMesaji"]
+    </div>
+}
 
 <table class="table">
     <thead>
         <tr>
-            <th>Tarih</th>
-            <th>Çalışan</th>
+            <th>Randevu Tarihi</th>
             <th>Hizmet</th>
+            <th>Çalışan</th>
             <th>Onay Durumu</th>
         </tr>
     </thead>
@@ -15,43 +36,63 @@
         @foreach (var randevu in Model)
         {
             <tr>
-                <td>@randevu.RandevuTarihi.ToString("dd/MM/yyyy HH:mm")</td>
-                <td>@randevu.Calisan?.Ad @randevu.Calisan?.Soyad</td>
-                <td>@randevu.Hizmet?.HizmetAdi</td>
-                <td>@(randevu.OnayliMi ? "Onaylandı" : "Onay Bekliyor")</td>
+                <td>@randevu.RandevuTarihi.ToString("g")</td>
+                <td>@randevu.Hizmet.HizmetAdi</td>
+                <td>@randevu.Calisan.Ad @randevu.Calisan.Soyad</td>
+                <td>
+                    <span class="badge bg-warning text-dark">Bekliyor</span> <!-- Sarı -->
+                    @if (randevu.OnayliMi == true)
+                    {
+                        <span class="badge bg-success">Onaylı</span> <!-- Yeşil -->
+                    }
+
+                    else if (randevu.OnayliMi == false && DateTime.Now >= randevu.RandevuTarihi)
+                    {
+                        <span class="badge bg-danger">Reddedildi</span> <!-- Kırmızı -->
+                    }
+                </td>
+
             </tr>
         }
     </tbody>
 </table>
-
 <h2>Yeni Randevu Al</h2>
 <form asp-action="RandevuAl" method="post">
     <div class="form-group">
-        <label for="HizmetId">Hizmet</label>
-        <select id="HizmetId" name="hizmetId" class="form-control" required>
-            <option value="">Hizmet Seçiniz</option>
-            @foreach (var calisan in ViewBag.Calisanlar)
-            {
-                foreach (var hizmet in calisan.CalisanHizmetler.Select(ch => ch.Hizmet))
-                {
-                    <option value="@hizmet.HizmetId">@hizmet.HizmetAdi (Çalışan: @calisan.Ad)</option>
-                }
-            }
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="CalisanId">Çalışan</label>
-        <select id="CalisanId" name="calisanId" class="form-control" required>
-            <option value="">Çalışan Seçiniz</option>
-            @foreach (var calisan in ViewBag.Calisanlar)
+        <label>Çalışan</label>
+        <select name="calisanId" class="form-control" required>
+            <option value="">Çalışan seçiniz</option>
+            @foreach (var calisan in calisanlar)
             {
                 <option value="@calisan.CalisanId">@calisan.Ad @calisan.Soyad</option>
             }
         </select>
     </div>
     <div class="form-group">
-        <label for="RandevuTarihi">Tarih ve Saat</label>
-        <input type="datetime-local" id="RandevuTarihi" name="randevuTarihi" class="form-control" required />
+        <label>Hizmet</label>
+        <select name="hizmetId" class="form-control" required>
+            <option value="">Hizmet seçiniz</option>
+            @foreach (var calisan in calisanlar)
+            {
+                foreach (var hizmet in calisan.CalisanHizmetler.Select(ch => ch.Hizmet).Distinct().ToList())
+                {
+                    <option value="@hizmet.HizmetId">@hizmet.HizmetAdi</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Randevu Tarihi</label>
+        <input type="datetime-local" name="randevuTarihi" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" required />
     </div>
     <button type="submit" class="btn btn-primary">Randevu Al</button>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4>Hoşgeldiniz, @kullaniciAdi</h4>
+        </div>
+        <form asp-action="CikisYap" method="post">
+            <button type="submit" class="btn btn-danger">Çıkış Yap</button>
+        </form>
+    </div>
+
 </form>
