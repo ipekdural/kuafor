@@ -181,42 +181,73 @@ public class AdminController : Controller
         ViewBag.Hizmetler = _context.Hizmetler.ToList();
         return View(calisan);
     }
-
     [Authorize(Policy = "Admin")]
     [HttpPost]
     public IActionResult CalisanSil(int id)
     {
         var calisan = _context.Calisanlar
             .Include(c => c.CalisanHizmetler)
+            .Include(c => c.Randevular) // Randevular ilişkisini dahil ettik
             .FirstOrDefault(c => c.CalisanId == id);
 
-        if (calisan != null)
+        if (calisan == null)
         {
-            // İlgili hizmetleri ve çalışanı sil
-            _context.CalisanHizmetler.RemoveRange(calisan.CalisanHizmetler);
-            _context.Calisanlar.Remove(calisan);
-            _context.SaveChanges();
+            return NotFound();
         }
+
+        // Randevuları işaretle
+        foreach (var randevu in calisan.Randevular)
+        {
+            randevu.SilindiMi = true;
+        }
+
+        // Çalışanı sil
+        _context.CalisanHizmetler.RemoveRange(calisan.CalisanHizmetler);
+        _context.Calisanlar.Remove(calisan);
+        _context.SaveChanges();
 
         return RedirectToAction("CalisanListesi");
     }
 
-    [Authorize(Policy = "Admin")]
+	[Authorize(Policy = "Admin")]
+	[HttpPost]
+	public IActionResult HizmetSil(int id)
+	{
+		var hizmet = _context.Hizmetler.FirstOrDefault(h => h.HizmetId == id);
+		if (hizmet == null)
+		{
+			return NotFound();
+		}
+
+		// Bu hizmete bağlı çalışanların UzmanlikHizmetId alanını güncelle
+		var bagliCalisanlar = _context.Calisanlar.Where(c => c.UzmanlikHizmetId == id).ToList();
+		foreach (var calisan in bagliCalisanlar)
+		{
+			calisan.UzmanlikHizmetId = null; // Veya başka bir hizmet ID'si atanabilir
+		}
+
+		_context.Hizmetler.Remove(hizmet);
+		_context.SaveChanges();
+
+		return RedirectToAction("HizmetListesi");
+	}
+
+	[Authorize(Policy = "Admin")]
     public IActionResult RandevuListesi()
     {
         var onaylanmamisRandevular = _context.Randevular
             .Include(r => r.Calisan)
             .Include(r => r.Hizmet)
             .Include(r => r.Kullanici)
-            .Where(r => !r.OnayliMi)
+            .Where(r => r.OnayliMi == null) // Onay bekleyenler
             .ToList();
-
         var onaylanmisRandevular = _context.Randevular
-            .Include(r => r.Calisan)
-            .Include(r => r.Hizmet)
-            .Include(r => r.Kullanici)
-            .Where(r => r.OnayliMi)
-            .ToList();
+         .Include(r => r.Calisan)
+         .Include(r => r.Hizmet)
+         .Include(r => r.Kullanici)
+         .Where(r => r.OnayliMi == true) // Onaylanmış randevular
+         .ToList();
+
 
         ViewBag.OnaylanmamisRandevular = onaylanmamisRandevular;
         return View(onaylanmisRandevular); // Onaylanmış randevular Model olarak gönderilir
@@ -304,18 +335,18 @@ public class AdminController : Controller
 
 
     // Hizmet Sil
-    [Authorize(Policy = "Admin")]
-    [HttpPost]
-    public IActionResult HizmetSil(int id)
-    {
-        var hizmet = _context.Hizmetler.Find(id);
-        if (hizmet != null)
-        {
-            _context.Hizmetler.Remove(hizmet);
-            _context.SaveChanges();
-        }
-        return RedirectToAction("HizmetListesi");
-    }
+    //[Authorize(Policy = "Admin")]
+    //[HttpPost]
+    //public IActionResult HizmetSil(int id)
+    //{
+    //    var hizmet = _context.Hizmetler.Find(id);
+    //    if (hizmet != null)
+    //    {
+    //        _context.Hizmetler.Remove(hizmet);
+    //        _context.SaveChanges();
+    //    }
+    //    return RedirectToAction("HizmetListesi");
+    //}
 
     // Kullanıcı Listesini JSON formatında döndürme
     [Authorize(Policy = "Admin")]
@@ -332,6 +363,8 @@ public class AdminController : Controller
 
         return Json(kullanicilar);
     }
+
+ 
     [Authorize(Policy = "Admin")]
     [HttpPost]
     public IActionResult RandevuOnayla(int id)
@@ -339,7 +372,7 @@ public class AdminController : Controller
         var randevu = _context.Randevular.FirstOrDefault(r => r.RandevuId == id);
         if (randevu != null)
         {
-            randevu.OnayliMi = true; // Randevuyu onayla
+            randevu.OnayliMi = true; // Randevu onaylanır
             _context.SaveChanges();
         }
         return RedirectToAction("RandevuListesi");
@@ -352,11 +385,11 @@ public class AdminController : Controller
         var randevu = _context.Randevular.FirstOrDefault(r => r.RandevuId == id);
         if (randevu != null)
         {
-            randevu.OnayliMi = false; // Onaylı değil olarak işaretle
-            _context.Randevular.Update(randevu); // Güncelleme işlemi
+            randevu.OnayliMi = false; // Randevu reddedilir
             _context.SaveChanges();
         }
         return RedirectToAction("RandevuListesi");
     }
+
 
 }

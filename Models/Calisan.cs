@@ -12,5 +12,8 @@
 
         // Çalışanın sunduğu hizmetlerle ilişkili FK
         public ICollection<CalisanHizmet>? CalisanHizmetler { get; set; }
+        public ICollection<Randevu>? Randevular
+        { get;set;
+        }
     }
 }

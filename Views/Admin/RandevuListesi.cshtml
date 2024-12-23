@@ -18,7 +18,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var randevu in onaylanmamisRandevular)
+        @foreach (var randevu in ViewBag.OnaylanmamisRandevular as List<kuafor.Models.Randevu>)
         {
             <tr>
                 <td>@randevu.RandevuId</td>
@@ -40,6 +40,7 @@
         }
     </tbody>
 </table>
+
 
 <h3>Onaylanmış Randevular</h3>
 <table class="table">

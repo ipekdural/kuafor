@@ -182,7 +182,7 @@ public class KullaniciController : Controller
             HizmetId = hizmetId,
             CalisanId = calisanId,
             RandevuTarihi = randevuTarihi,
-            OnayliMi = false // Başlangıçta onaysız
+            OnayliMi = null // Başlangıçta onaysız
         };
 
         _context.Randevular.Add(yeniRandevu);
@@ -191,7 +191,13 @@ public class KullaniciController : Controller
         return RedirectToAction("AldigimRandevular");
     }
 
-
+    [Authorize]
+    [HttpPost]
+    public IActionResult CikisYap()
+    {
+        HttpContext.SignOutAsync(); // Oturum kapatılır
+        return RedirectToAction("Giris", "Kullanici"); // Giriş sayfasına yönlendirilir
+    }
 
 
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace kuafor.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241221113213_AddDefaultValueToOnayliMi")]
+    partial class AddDefaultValueToOnayliMi
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -142,9 +145,6 @@ namespace kuafor.Migrations
                     b.Property<DateTime>("RandevuTarihi")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("SilindiMi")
-                        .HasColumnType("bit");
-
                     b.HasKey("RandevuId");
 
                     b.HasIndex("CalisanId");
@@ -188,14 +188,14 @@ namespace kuafor.Migrations
             modelBuilder.Entity("kuafor.Models.Randevu", b =>
                 {
                     b.HasOne("kuafor.Models.Calisan", "Calisan")
-                        .WithMany("Randevular")
+                        .WithMany()
                         .HasForeignKey("CalisanId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("kuafor.Models.Hizmet", "Hizmet")
                         .WithMany()
                         .HasForeignKey("HizmetId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("kuafor.Models.Kullanici", "Kullanici")
                         .WithMany()
@@ -212,8 +212,6 @@ namespace kuafor.Migrations
             modelBuilder.Entity("kuafor.Models.Calisan", b =>
                 {
                     b.Navigation("CalisanHizmetler");
-
-                    b.Navigation("Randevular");
                 });
 #pragma warning restore 612, 618
         }

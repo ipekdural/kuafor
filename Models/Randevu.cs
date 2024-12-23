@@ -36,10 +36,11 @@
         {
             get; set;
         }
-
-        public bool OnayliMi
+        public bool? OnayliMi
         {
             get; set;
-        } // Randevunun onaylanıp onaylanmadığını belirten flag
+        } // null: bekliyor, true: onaylı, false: reddedilmiş
+        public bool SilindiMi { get; set; } = false;
+
     }
 }
