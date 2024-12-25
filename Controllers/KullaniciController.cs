@@ -104,11 +104,10 @@ public class KullaniciController : Controller
         }
 
         var randevular = _context.Randevular
-           .Include(r => r.Calisan)
-           .Include(r => r.Hizmet)
-           .Where(r => r.KullaniciId == kullanici.Id) // Kullanıcıya ait tüm randevuları getir
-           .ToList();
-
+            .Include(r => r.Calisan)
+            .Include(r => r.Hizmet)
+            .Where(r => r.KullaniciId == kullanici.Id)
+            .ToList();
 
         ViewBag.Calisanlar = _context.Calisanlar
             .Include(c => c.CalisanHizmetler)
@@ -117,6 +116,7 @@ public class KullaniciController : Controller
 
         return View(randevular);
     }
+
 
     [Authorize]
     [HttpPost]
@@ -198,7 +198,17 @@ public class KullaniciController : Controller
         HttpContext.SignOutAsync(); // Oturum kapatılır
         return RedirectToAction("Giris", "Kullanici"); // Giriş sayfasına yönlendirilir
     }
+    [HttpGet]
+    public IActionResult GetHizmetlerByCalisan(int calisanId)
+    {
+        var hizmetler = _context.CalisanHizmetler
+            .Where(ch => ch.CalisanId == calisanId)
+            .Select(ch => ch.Hizmet)
+            .Distinct()
+            .ToList();
 
+        return Json(hizmetler);
+    }
 
 
 

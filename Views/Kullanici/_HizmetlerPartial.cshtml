@@ -1,0 +1,7 @@
+﻿@model List<kuafor.Models.Hizmet>
+
+<option value="">Hizmet seçiniz</option>
+@foreach (var hizmet in Model)
+{
+    <option value="@hizmet.HizmetId">@hizmet.HizmetAdi</option>
+}

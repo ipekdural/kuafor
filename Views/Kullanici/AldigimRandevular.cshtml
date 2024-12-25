@@ -57,36 +57,54 @@
         }
     </tbody>
 </table>
-
-<h2>Yeni Randevu Al</h2>
 <form asp-action="RandevuAl" method="post">
     <div class="form-group">
         <label>Çalışan</label>
-        <select name="calisanId" class="form-control" required>
+        <select id="calisanSelect" name="calisanId" class="form-control" required>
             <option value="">Çalışan seçiniz</option>
-            @foreach (var calisan in calisanlar)
+            @foreach (var calisan in ViewBag.Calisanlar)
             {
                 <option value="@calisan.CalisanId">@calisan.Ad @calisan.Soyad</option>
             }
         </select>
     </div>
+
     <div class="form-group">
         <label>Hizmet</label>
-        <select name="hizmetId" class="form-control" required>
+        <select id="hizmetSelect" name="hizmetId" class="form-control" required>
             <option value="">Hizmet seçiniz</option>
-            @foreach (var calisan in calisanlar)
-            {
-                foreach (var hizmet in calisan.CalisanHizmetler.Select(ch => ch.Hizmet).Distinct().ToList())
-                {
-                    <option value="@hizmet.HizmetId">@hizmet.HizmetAdi</option>
-                }
-            }
         </select>
     </div>
+
     <div class="form-group">
         <label>Randevu Tarihi</label>
         <input type="datetime-local" name="randevuTarihi" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" required />
     </div>
-    <button type="submit" class="btn btn-primary">Randevu Al</button>
 
+    <button type="submit" class="btn btn-primary">Randevu Al</button>
 </form>
+<script>
+    document.getElementById("calisanSelect").addEventListener("change", function () {
+        var calisanId = this.value;
+        var hizmetSelect = document.getElementById("hizmetSelect");
+
+        // Seçenekleri temizle
+        hizmetSelect.innerHTML = '<option value="">Hizmet seçiniz</option>';
+
+        if (calisanId) {
+            fetch('/Kullanici/GetHizmetlerByCalisan?calisanId=' + calisanId)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(function (hizmet) {
+                        var option = document.createElement("option");
+                        option.value = hizmet.hizmetId;
+                        option.textContent = hizmet.hizmetAdi;
+                        hizmetSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    });
+</script>
+
+
