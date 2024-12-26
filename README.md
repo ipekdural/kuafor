@@ -29,7 +29,5 @@ Hizmet Seçin listesinden bir hizmeti seçin (Saç Kesimi, Saç Boyama, vb.).
 Hizmet Almak İstediğiniz Çalışan listesinden istediğiniz çalışanı seçin.
 Tarih ve Saat alanında randevu zamanını seçin.
 Randevu Al butonuna tıklayın.
-Verilerin Kaydedilmesi
-
 Basit bir örnek olması adına, bu formun verileri varsayılan olarak veritabanına ya da bir listeye kaydedilebilir.
 Gerçek proje senaryosunda, bu formun gönderimi AppointmentController (örnek) içerisinde yazılacak mantık ile randevu bilgilerini kaydedebilir.
