@@ -4,7 +4,7 @@
 <table class="table">
     <thead>
         <tr>
-            <th>ID</th>
+         
             <th>Ad</th>
             <th>Soyad</th>
             <th>Uzmanlık Alanı</th>
@@ -16,7 +16,6 @@
         @foreach (var calisan in Model)
         {
             <tr>
-                <td>@calisan.CalisanId</td>
                 <td>@calisan.Ad</td>
                 <td>@calisan.Soyad</td>
                 <td>@calisan.UzmanlikHizmet?.HizmetAdi</td>
