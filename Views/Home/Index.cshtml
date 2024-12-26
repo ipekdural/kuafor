@@ -1,64 +1,19 @@
-﻿@{
-    Layout = "~/Views/Shared/_Layout.cshtml"; 
-}
-
-<h1>Hoşgeldiniz!</h1>
-<p>Kuaför Uygulamasına Hoşgeldiniz. Randevu alabilir ve saç modeli önerisi alabilirsiniz.</p>
-
-<h2>Fotoğraf Yükleyerek Saç Modeli Önerisi Al</h2>
-<div class="mt-4">
-    <input type="file" id="imageInput" accept="image/*" />
-    <button id="uploadButton" class="btn btn-secondary mt-2">Fotoğraf Yükle</button>
-</div>
-<div id="uploadedImage" style="max-width:200px;" class="mt-4"></div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script>
-
-    $(document).ready(function () {
-        $("#uploadButton").click(function () {
-            const fileInput = $("#imageInput")[0];
-            const file = fileInput.files[0];
-
-            if (!file) {
-                alert("Lütfen bir fotoğraf seçin!");
-                return;
-            }
-            const options =["101", "201", "301", "401", "501", "601", "701", "801", "901", "1001", "1101", "1201", "1301"];
-            const randomOption = options[Math.floor(Math.random() * options.length)];
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuaför Uygulaması</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
 
 
-            const data = new FormData();
-            data.append("image_target", file);
-            data.append("hair_type", randomOption);
+    <div class="container mt-4">
+        <!-- İçerik buraya gelecek -->
+        <h1>Kuaför Uygulamasına Hoşgeldiniz!</h1>
+    </div>
 
-            $.ajax({
-                url: "https://hairstyle-changer.p.rapidapi.com/huoshan/facebody/hairstyle",
-                method: "POST",
-                headers: {
-                    'x-rapidapi-key': '5abd691723msh5875118067f34e2p12fadcjsn8242f90c015d',
-                    'x-rapidapi-host': 'hairstyle-changer.p.rapidapi.com',
-                },
-                processData: false,
-                contentType: false,
-                data: data,
-                success: function (response) {
-                    const base64Image = response.data.image;
-                    const imgElement = document.createElement("img");
-                    
-                    imgElement.src = `data:image/jpeg;base64,${base64Image}`;
-                    imgElement.className = "img-thumbnail";
-                    imgElement.style.width = "100%";
-                    imgElement.style.height = "auto";
-                    imgElement.style.marginTop = "20px";
-
-                    $("#uploadedImage").html(imgElement);
-                },
-                error: function (xhr, status, error) {
-                    alert("Bir hata oluştu. Lütfen tekrar deneyin.");
-                    console.error("Error:", status, error);
-                },
-            });
-        });
-    });
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

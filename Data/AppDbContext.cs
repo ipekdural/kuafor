@@ -5,6 +5,7 @@ public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+    // Tablo olarak tanımlanacak modeller
     public DbSet<Kullanici> Kullanicilar
     {
         get; set;
@@ -26,6 +27,7 @@ public class AppDbContext : DbContext
         get; set;
     }
 
+    // OnModelCreating metodu
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -43,6 +45,7 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(ch => ch.HizmetId);
 
+        // Kullanıcılar tablosunun yapılandırılması
         modelBuilder.Entity<Kullanici>(entity =>
         {
             entity.HasKey(k => k.Id);
@@ -52,6 +55,7 @@ public class AppDbContext : DbContext
             entity.Property(k => k.Sifre).IsRequired().HasMaxLength(100);
         });
 
+        // Hizmetler tablosunun yapılandırılması
         modelBuilder.Entity<Hizmet>(entity =>
         {
             entity.HasKey(h => h.HizmetId);
@@ -60,12 +64,14 @@ public class AppDbContext : DbContext
             entity.Property(h => h.Ucret).IsRequired();
         });
 
+        // Çalışanlar tablosunun yapılandırılması
         modelBuilder.Entity<Calisan>()
             .HasOne(c => c.UzmanlikHizmet)
             .WithMany()
             .HasForeignKey(c => c.UzmanlikHizmetId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        // Randevular tablosunun yapılandırılması
         modelBuilder.Entity<Randevu>(entity =>
         {
             entity.HasKey(r => r.RandevuId);
@@ -73,11 +79,19 @@ public class AppDbContext : DbContext
             entity.Property(r => r.RandevuTarihi).IsRequired();
             entity.Property(r => r.OnayliMi).HasDefaultValue(null);
 
+            // Hizmet ile ilişki
             entity.HasOne(r => r.Hizmet)
                 .WithMany()
                 .HasForeignKey(r => r.HizmetId)
-                .OnDelete(DeleteBehavior.Cascade); 
+                .OnDelete(DeleteBehavior.Cascade); // Hizmet silinirse randevular silinsin
 
+            //// Çalışan ile ilişki
+            //entity.HasOne(r => r.Calisan)
+            //    .WithMany()
+            //    .HasForeignKey(r => r.CalisanId)
+            //    .OnDelete(DeleteBehavior.Cascade); // Çalışan silinirse randevular silinsin
+
+            // Kullanıcı ile ilişki
             entity.HasOne(r => r.Kullanici)
                 .WithMany()
                 .HasForeignKey(r => r.KullaniciId)

@@ -9,7 +9,7 @@
 <table class="table">
     <thead>
         <tr>
-  
+            <th>ID</th>
             <th>Kullanıcı</th>
             <th>Çalışan</th>
             <th>Hizmet</th>
@@ -21,7 +21,7 @@
         @foreach (var randevu in ViewBag.OnaylanmamisRandevular as List<kuafor.Models.Randevu>)
         {
             <tr>
-           
+                <td>@randevu.RandevuId</td>
                 <td>@randevu.Kullanici?.Isim @randevu.Kullanici?.Soyisim</td>
                 <td>@randevu.Calisan?.Ad @randevu.Calisan?.Soyad</td>
                 <td>@randevu.Hizmet?.HizmetAdi</td>
@@ -46,6 +46,7 @@
 <table class="table">
     <thead>
         <tr>
+            <th>ID</th>
             <th>Kullanıcı</th>
             <th>Çalışan</th>
             <th>Hizmet</th>
@@ -56,7 +57,7 @@
         @foreach (var randevu in Model)
         {
             <tr>
-            
+                <td>@randevu.RandevuId</td>
                 <td>@randevu.Kullanici?.Isim @randevu.Kullanici?.Soyisim</td>
                 <td>@randevu.Calisan?.Ad @randevu.Calisan?.Soyad</td>
                 <td>@randevu.Hizmet?.HizmetAdi</td>

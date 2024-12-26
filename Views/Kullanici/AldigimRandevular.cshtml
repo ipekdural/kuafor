@@ -1,8 +1,8 @@
 ﻿@model List<kuafor.Models.Randevu>
 
 @{
-    var kullaniciAdi = User.Identity.Name; 
-    var calisanlar = ViewBag.Calisanlar as List<kuafor.Models.Calisan>; 
+    var kullaniciAdi = User.Identity.Name; // Kullanıcı adı oturumdan alınır
+    var calisanlar = ViewBag.Calisanlar as List<kuafor.Models.Calisan>; // ViewBag'i uygun türe cast et
 }
 
 <h2>Randevularım</h2>
@@ -57,54 +57,36 @@
         }
     </tbody>
 </table>
+
+<h2>Yeni Randevu Al</h2>
 <form asp-action="RandevuAl" method="post">
     <div class="form-group">
         <label>Çalışan</label>
-        <select id="calisanSelect" name="calisanId" class="form-control" required>
+        <select name="calisanId" class="form-control" required>
             <option value="">Çalışan seçiniz</option>
-            @foreach (var calisan in ViewBag.Calisanlar)
+            @foreach (var calisan in calisanlar)
             {
                 <option value="@calisan.CalisanId">@calisan.Ad @calisan.Soyad</option>
             }
         </select>
     </div>
-
     <div class="form-group">
         <label>Hizmet</label>
-        <select id="hizmetSelect" name="hizmetId" class="form-control" required>
+        <select name="hizmetId" class="form-control" required>
             <option value="">Hizmet seçiniz</option>
+            @foreach (var calisan in calisanlar)
+            {
+                foreach (var hizmet in calisan.CalisanHizmetler.Select(ch => ch.Hizmet).Distinct().ToList())
+                {
+                    <option value="@hizmet.HizmetId">@hizmet.HizmetAdi</option>
+                }
+            }
         </select>
     </div>
-
     <div class="form-group">
         <label>Randevu Tarihi</label>
         <input type="datetime-local" name="randevuTarihi" class="form-control" min="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" required />
     </div>
-
     <button type="submit" class="btn btn-primary">Randevu Al</button>
+
 </form>
-<script>
-    document.getElementById("calisanSelect").addEventListener("change", function () {
-        var calisanId = this.value;
-        var hizmetSelect = document.getElementById("hizmetSelect");
-
-     
-        hizmetSelect.innerHTML = '<option value="">Hizmet seçiniz</option>';
-
-        if (calisanId) {
-            fetch('/Kullanici/GetHizmetlerByCalisan?calisanId=' + calisanId)
-                .then(response => response.json())
-                .then(data => {
-                    data.forEach(function (hizmet) {
-                        var option = document.createElement("option");
-                        option.value = hizmet.hizmetId;
-                        option.textContent = hizmet.hizmetAdi;
-                        hizmetSelect.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Error:', error));
-        }
-    });
-</script>
-
-
